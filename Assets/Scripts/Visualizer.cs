@@ -8,6 +8,7 @@ public class Visualizer : MonoBehaviour {
     Light RedLight;
     Light BlueLight;
     Light GreenLight;
+    Light TurkLight;
 
 	public float lifetimeBase = 1;
 	public float lifetimeScale = 8;
@@ -77,6 +78,7 @@ public class Visualizer : MonoBehaviour {
         RedLight = GameObject.Find("Red").GetComponent<Light>();
         BlueLight = GameObject.Find("Blue").GetComponent<Light>();
         GreenLight = GameObject.Find("Green").GetComponent<Light>();
+        TurkLight = GameObject.Find("Turk").GetComponent<Light>();
 	}
 	
 	// Update is called once per frame
@@ -243,6 +245,7 @@ public class Visualizer : MonoBehaviour {
         RedLight.intensity = subBass * lightScale;
         BlueLight.intensity = lowMidrange * lightScale;
         GreenLight.intensity = bass * lightScale;
+        TurkLight.intensity = midrange * lightScale;
 
 	}
 }
