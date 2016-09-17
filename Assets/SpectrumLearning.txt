@@ -1,0 +1,39 @@
+In this project we want to know more about the spectrum of information we are getting.
+
+These two sites are my references for my new knowledge of the audio spectrum!
+http://www.teachmeaudio.com/mixing/techniques/audio-spectrum
+http://forum.unity3d.com/threads/making-sense-of-spectrum-data.90262/
+
+Using the first and second links together I will figure out what ranges I can use for different data:
+
+Hz * 0.34133 = index
+
+20-50hz = 6.8 - 17 - Sub bass, difficult to hear
+
+60-250hz = 20.5 - 85.3 - Bass
+
+250-500hz = 85.3 - 170.6 - Low Midrange
+
+500-2k = 170.6 - 682.6 - Midrange
+
+2k-4k = 682.6 - 1365.3 - Upper Midrange
+
+// Below this hurts the ears and I doubt will be in regular music
+
+4k-6k = 1365.3 - 2048 - Presence
+
+6k-20k = 2048 - 6826.6 - Brilliance
+
+
+/////////////////////////////////
+
+
+Sum these sections and apply them to different places!
+
+What did we change this time/learn about? Aguust 14th 2016
+- Learned more about fourier transforms and how the spectrum data is being computed
+- added debug lines to visualize the data better
+- Added a moving averages smoothing algorithm
+- Learned about k-means machine learning clustering algorithm.
+	- Next step is to use this algorithm to cluster peaks together and change values of the particles based on those peaks rather than the ranges above
+	- this allows for the ability to better change our movients etc based on the song, now if we only have base, we can adjust more values using it.
