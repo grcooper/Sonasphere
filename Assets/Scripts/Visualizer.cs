@@ -4,8 +4,10 @@ using System.Collections.Generic;
 
 public class Visualizer : MonoBehaviour {
 
-	GameObject EstherObject;
-	ParticleSystem EstherSystem;
+    public float lightScale = 10;
+    Light RedLight;
+    Light BlueLight;
+    Light GreenLight;
 
 	public float lifetimeBase = 1;
 	public float lifetimeScale = 8;
@@ -72,8 +74,9 @@ public class Visualizer : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		EstherObject = GameObject.Find ("Esther");
-		EstherSystem = EstherObject.GetComponent<ParticleSystem>();
+        RedLight = GameObject.Find("Red").GetComponent<Light>();
+        BlueLight = GameObject.Find("Blue").GetComponent<Light>();
+        GreenLight = GameObject.Find("Green").GetComponent<Light>();
 	}
 	
 	// Update is called once per frame
@@ -237,9 +240,9 @@ public class Visualizer : MonoBehaviour {
             Debug.Log(peakArray[i].getAverage());
         }
 
-        //EstherSystem. = spectrum [1] * 10;
-        EstherSystem.startLifetime = lifetimeBase + (lowMidrange * lifetimeScale);
-		EstherSystem.startSpeed = speedBase + (midrange * speedScale);
-		EstherSystem.startSize = sizeBase + (subBass + bass * sizeScale);
+        RedLight.intensity = subBass * lightScale;
+        BlueLight.intensity = lowMidrange * lightScale;
+        GreenLight.intensity = bass * lightScale;
+
 	}
 }
