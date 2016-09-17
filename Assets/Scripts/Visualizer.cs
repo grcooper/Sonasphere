@@ -198,9 +198,33 @@ public class Visualizer : MonoBehaviour {
 		Debug.Log("upperMidrange: " + upperMidrange);*/
 
 
-        for (int i = 1; i * 4 < spectrumSize - 1; i++)
+		for (int i = 1; i < (spectrumSize / 4) - 1; i++)
         {
+          // 20-50hz = 6.8 - 17 - Sub bass
+          if (i >= subBassLow && i <= subBassHigh)
+          {
             Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.red);
+          }
+          // 60-250hz = 20.5 - 85.3 - Bass
+          else if (i >= bassLow && i <= bassHigh)
+          {
+            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.green);
+          }
+          // 250-500hz = 85.3 - 170.6 - Low Midrange
+          else if (i >= lowMidrangeLow && i <= lowMidrangeHigh)
+          {
+            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.blue);
+          }
+          //500-2k = 170.6 - 682.6 - Midrange
+          else if (i >= midrangeLow && i <= midrangeHigh)
+          {
+            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.cyan);
+          }
+          // 2k-4k = 682.6 - 1365.3 - Upper Midrange
+          else if (i >= upperMidrangeLow && i <= upperMidrangeHigh)
+          {
+            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.white);
+          }
             //Debug.DrawLine(new Vector3(i - 1, Mathf.Abs(Mathf.Log(spectrum[i * 4]) * 50), 2), new Vector3(i, Mathf.Abs(Mathf.Log(spectrum[(i + 1) * 4]) * 50), 2), Color.cyan);
             //Debug.DrawLine(new Vector3(Mathf.Log(i - 1), spectrum[i - 1] - 10, 1), new Vector3(Mathf.Log(i), spectrum[i] - 10, 1), Color.green);
             // Debug.DrawLine(new Vector3(Mathf.Log(i - 1), Mathf.Log(spectrum[i - 1]), 3), new Vector3(Mathf.Log(i), Mathf.Log(spectrum[i]), 3), Color.blue);
