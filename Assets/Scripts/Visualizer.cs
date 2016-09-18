@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 public class Visualizer : MonoBehaviour {
 
-    public float lightScale = 10;
-    Light RedLight;
-    Light BlueLight;
-    Light GreenLight;
-    Light TurkLight;
+    public float lightScale = 100;
+    Light BassKickLight;
+    Light MelodyLowLight;
+    Light MelodyMidLight;
+    Light SnareLight;
 
 	public float lifetimeBase = 1;
 	public float lifetimeScale = 8;
@@ -20,33 +20,26 @@ public class Visualizer : MonoBehaviour {
 	public float sizeScale = 4;
 
     // Holds the spectrum data, has to be a power of 2, might go down to 1024 if lag
-    const int spectrumSize = 1024;
+    const int spectrumSize = 2048;
 	private float[] spectrum = new float[spectrumSize];
 
 	// 20-50hz = 6.8 - 17 - Sub bass
-	const int subBassLow = 6;
-	const int subBassHigh = 19;
+	SpectrumRange subBass = new SpectrumRange(6, 19);
 
 	// 60-250hz = 20.5 - 85.3 - Bass
-	const int bassLow = 20;
-	const int bassHigh = 85;
+	SpectrumRange bass = new SpectrumRange(20, 85);
 
 	// 250-500hz = 85.3 - 170.6 - Low Midrange
-	const int lowMidrangeLow = 86;
-	const int lowMidrangeHigh = 170;
+	SpectrumRange lowMidrange = new SpectrumRange(86, 170);
 
 	//500-2k = 170.6 - 682.6 - Midrange
-	const int midrangeLow = 171;
-	const int midrangeHigh = 682;
+	SpectrumRange midrange = new SpectrumRange(171, 682);
 
 	// 2k-4k = 682.6 - 1365.3 - Upper Midrange
-	const int upperMidrangeLow = 683;
-	const int upperMidrangeHigh = 1365;
+	SpectrumRange upperMidrange = new SpectrumRange(683, 1365);
 
-    /* Below this hurts the ears and I doubt will be in regular music
-	6k-20k = 2048 - 6826.6 - Brilliance
-	4k-6k = 1365.3 - 2048 - Presence
-	*/
+	// 4k-6k = 1365.3 - 2048 - Presence
+	SpectrumRange presence = new SpectrumRange(1366, 2047);
 
     // For use in the moving average algorithm to smooth our data
     const int movingAverageSize = 20;
@@ -56,29 +49,12 @@ public class Visualizer : MonoBehaviour {
     public int debugLineScale = 400;
 
 
-    public class Peak
-    {
-        public int startIndex;
-        public int endIndex;
-        public List<float> data;
-        public float total;
-        public float max;
-        public float getAverage()
-        {
-            return total / data.Count;
-        }
-        public Peak() { data = new List<float>();  }
-    };
-
-    private List<Peak> peakArray;
-
-
 	// Use this for initialization
 	void Start () {
-        RedLight = GameObject.Find("Red").GetComponent<Light>();
-        BlueLight = GameObject.Find("Blue").GetComponent<Light>();
-        GreenLight = GameObject.Find("Green").GetComponent<Light>();
-        TurkLight = GameObject.Find("Turk").GetComponent<Light>();
+        BassKickLight = GameObject.Find("Bass Kick").GetComponent<Light>();
+        MelodyLowLight = GameObject.Find("Melody Low").GetComponent<Light>();
+		MelodyMidLight = GameObject.Find("Melody Mid").GetComponent<Light>();
+		SnareLight = GameObject.Find("Snare").GetComponent<Light>();
 	}
 	
 	// Update is called once per frame
@@ -103,19 +79,9 @@ public class Visualizer : MonoBehaviour {
         }
         currentAverage /= movingAverageSize;
 
-        float subBass = 0f;
-		float bass = 0f;
-		float lowMidrange = 0f;
-		float midrange = 0f;
-		float upperMidrange = 0f;
+        for (int i = 0; i < spectrumSize; i++)
+        {
 
-        // For peak calculations, when in the loop do we have a peak started, and where are we in the peak array
-        int numPeaks = 0;
-        bool startedPeak = false;
-        peakArray = new List<Peak>();
-
-		for (int i = 0; i < spectrumSize; ++i)
-		{
             //Average out the value using moving average
             if(i > movingAverageSize / 2)
             {
@@ -135,117 +101,102 @@ public class Visualizer : MonoBehaviour {
                 }
                 currentAverage /= Mathf.Min(movingAverageSize, (spectrumSize - i) + (movingAverageSize / 2));
             }
-            if (currentAverage * 0.9f + spectrum[i] * 0.1f < minValue)
-            {
-                spectrum[i] = 0;
-            }
-            else
-            {
+
+            // if (currentAverage * 0.9f + spectrum[i] * 0.1f < minValue)
+            // {
+            //     spectrum[i] = 0;
+            // }
+            // else
+            // {
                 spectrum[i] = currentAverage * 0.9f + spectrum[i] * 0.1f;
-            }
+            // }
 
-            // Two cases, we need to create a new peak or we need to finalize an old peak
-            if(i-1 > 0 && spectrum[i-1] == 0 && spectrum[i] != 0)
+            if (subBass.inRange(i))
             {
-                startedPeak = true;
-                peakArray.Add(new Peak());
-                peakArray[numPeaks].startIndex = i;
+                subBass.addToSum(spectrum [i]);
             }
-
-            if(startedPeak)
+            else if (bass.inRange(i))
             {
-                peakArray[numPeaks].total += spectrum[i];
-                peakArray[numPeaks].data.Add(spectrum[i]);
-                if(peakArray[numPeaks].max < spectrum[i])
-                {
-                    peakArray[numPeaks].max = spectrum[i];
-                }
+                bass.addToSum(spectrum [i]);
             }
-
-            // We have started a peak already and are now finishing it.
-            if (i-1 > 0 && spectrum[i-1] != 0 && (spectrum[i] == 0 || i == (spectrumSize - 1)) && startedPeak)
+            else if (lowMidrange.inRange(i))
             {
-                startedPeak = false;
-                peakArray[numPeaks].endIndex = i;
-                numPeaks++;
+                lowMidrange.addToSum(spectrum [i]);
             }
+            else if (midrange.inRange(i))
+            {
+                midrange.addToSum(spectrum [i]);
+            }
+            else if (upperMidrange.inRange(i))
+            {
+                upperMidrange.addToSum(spectrum [i]);
+            }
+            else if(presence.inRange(i))
+            {
+                presence.addToSum(spectrum [i]);
+            } else {
+                // Debug.Log(i);
+            }
+            // Log all of the items
+            /*Debug.Log("SubBass: " + subBass);
+            Debug.Log("Bass: " + bass);
+            Debug.Log("LowMidrange: " + lowMidrange);
+            Debug.Log("Midrange: " + midrange);
+            Debug.Log("upperMidrange: " + upperMidrange);*/
+        }
 
-			if (i >= subBassLow && i <= subBassHigh)
-			{
-				subBass += spectrum [i];
-			}
-			else if (i >= bassLow && i <= bassHigh)
-			{
-				bass += spectrum [i];
-			}
-			else if (i >= lowMidrangeLow && i <= lowMidrangeHigh)
-			{
-				lowMidrange += spectrum [i];
-			}
-			else if (i >= midrangeLow && i <= midrangeHigh)
-			{
-				midrange += spectrum [i];
-			}
-			else if (i >= upperMidrangeLow && i <= upperMidrangeHigh)
-			{
-				upperMidrange += spectrum [i];
-			}
-			/*else if( i > upperMidrangeHigh)
-			{
-				break;
-			}*/
-		}
-        // Log all of the items
-        /*Debug.Log("SubBass: " + subBass);
-		Debug.Log("Bass: " + bass);
-		Debug.Log("LowMidrange: " + lowMidrange);
-		Debug.Log("Midrange: " + midrange);
-		Debug.Log("upperMidrange: " + upperMidrange);*/
-
-
-		for (int i = 1; i < (spectrumSize / 4) - 1; i++)
+		for (int i = 1; i < (spectrumSize / 1) - 1; i++)
         {
-          // 20-50hz = 6.8 - 17 - Sub bass
-          if (i >= subBassLow && i <= subBassHigh)
-          {
-            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.red);
-          }
-          // 60-250hz = 20.5 - 85.3 - Bass
-          else if (i >= bassLow && i <= bassHigh)
-          {
-            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.green);
-          }
-          // 250-500hz = 85.3 - 170.6 - Low Midrange
-          else if (i >= lowMidrangeLow && i <= lowMidrangeHigh)
-          {
-            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.blue);
-          }
-          //500-2k = 170.6 - 682.6 - Midrange
-          else if (i >= midrangeLow && i <= midrangeHigh)
-          {
-            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.cyan);
-          }
-          // 2k-4k = 682.6 - 1365.3 - Upper Midrange
-          else if (i >= upperMidrangeLow && i <= upperMidrangeHigh)
-          {
-            Debug.DrawLine(new Vector3(i - 1, spectrum[i] * debugLineScale, 0), new Vector3(i, spectrum[i + 1] * debugLineScale, 0), Color.white);
-          }
+			// 20-50hz = 6.8 - 17 - Sub bass
+			if (subBass.inRange(i)) {
+				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.red);
+			}
+			// 60-250hz = 20.5 - 85.3 - Bass
+			else if (bass.inRange(i)) {
+				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.green);
+			}
+			// 250-500hz = 85.3 - 170.6 - Low Midrange
+			else if (lowMidrange.inRange(i)) {
+				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.blue);
+			}
+			//500-2k = 170.6 - 682.6 - Midrange
+			else if (midrange.inRange(i)) {
+				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.cyan);
+			} else {
+//				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.cyan);
+			}
             //Debug.DrawLine(new Vector3(i - 1, Mathf.Abs(Mathf.Log(spectrum[i * 4]) * 50), 2), new Vector3(i, Mathf.Abs(Mathf.Log(spectrum[(i + 1) * 4]) * 50), 2), Color.cyan);
             //Debug.DrawLine(new Vector3(Mathf.Log(i - 1), spectrum[i - 1] - 10, 1), new Vector3(Mathf.Log(i), spectrum[i] - 10, 1), Color.green);
             // Debug.DrawLine(new Vector3(Mathf.Log(i - 1), Mathf.Log(spectrum[i - 1]), 3), new Vector3(Mathf.Log(i), Mathf.Log(spectrum[i]), 3), Color.blue);
         }
 
-        Debug.Log("PEAKS");
-        for(int i = 0; i < peakArray.Count; ++i)
-        {
-            Debug.Log("Peak: " + i);
-            Debug.Log(peakArray[i].getAverage());
+        // Debug.Log("PEAKS");
+        // for(int i = 0; i < peakArray.Count; ++i)
+        // {
+        //     Debug.Log("Peak: " + i);
+        //     Debug.Log(peakArray[i].getAverage());
+        // }
+        float bassKickValue = subBass.max;
+        float snareValue = lowMidrange.avg() * 0.16f + midrange.avg() * 0.38f + upperMidrange.max * 0.17f + presence.max * 0.29f;
+        if (bassKickValue > 0.1f) {
+            snareValue *= 0.1f;
         }
-
-        RedLight.intensity = subBass * lightScale;
-        BlueLight.intensity = lowMidrange * lightScale;
-        GreenLight.intensity = bass * lightScale;
-        TurkLight.intensity = midrange * lightScale;
-
+		
+		BassKickLight.intensity = bassKickValue * lightScale;
+		MelodyLowLight.intensity = bass.avg() * 5 * lightScale;
+		MelodyMidLight.intensity = lowMidrange.avg() * 5 * lightScale;
+		SnareLight.intensity = snareValue * 3 * lightScale;
+        // Debug.Log("subBass" + subBass.sum);
+        // Debug.Log("bass" + bass.sum);
+        // Debug.Log("lowMidrange" + lowMidrange.sum);
+        // Debug.Log("midrange" + midrange.sum);
+        // Debug.Log("uper" + upperMidrange.sum);
+        // Debug.Log("pres" + presence.sum);
+        subBass.reset();
+        bass.reset();
+        lowMidrange.reset();
+        midrange.reset();
+        upperMidrange.reset();
+        presence.reset();
 	}
 }
