@@ -1,7 +1,7 @@
 # Sonasphere
 
 ##[Demo Video](https://www.youtube.com/watch?v=79BfGVj-3uE)
-[![Demo Video](https://img.youtube.com/vi/79BfGVj-3uE/0.jpg)](https://www.youtube.com/watch?v=79BfGVj-3uE)
+[![Demo Video](http://i.imgur.com/nTN1dlt.png)](https://www.youtube.com/watch?v=79BfGVj-3uE)
 
 ### Inspiration
 
