@@ -223,6 +223,8 @@ public class Visualizer : MonoBehaviour {
     public int secofLastFireWork = 0;
     public int fireWorkTimeBuffer = 300;
 
+    public Dictionary<GameObject, int> particleSystems = new Dictionary<GameObject, int>();
+
     public void Visualize(float bassKick, float melodyLow, float melodyMid, float snare)
     {
         // Sun Changes
@@ -252,7 +254,16 @@ public class Visualizer : MonoBehaviour {
             partSys.GetComponent<ParticleSystem>().Play();
             msofLastFireWork = System.DateTime.Now.Millisecond;
             secofLastFireWork = System.DateTime.Now.Second;
+            particleSystems.Add(partSys, System.DateTime.Now.Second);
+            foreach (KeyValuePair<GameObject, int> entry in particleSystems)
+            {
+                // do something with entry.Value or entry.Key
+                if (entry.Value + 1 < System.DateTime.Now.Second)
+                {
+                    entry.Key.SetActive(false);
+                    //particleSystems.Remove(entry.Key);
+                }
+            }
         }
-        
     }
 }
