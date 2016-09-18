@@ -10,7 +10,8 @@ public class Visualizer : MonoBehaviour {
     Light MelodyMidLight;
     Light SnareLight;*/
 
-	public float lifetimeBase = 1;
+
+    public float lifetimeBase = 1;
 	public float lifetimeScale = 8;
 
 	public float speedBase = 1;
@@ -48,16 +49,20 @@ public class Visualizer : MonoBehaviour {
 
     public int debugLineScale = 400;
 
+    public GameObject ps;
+
 	// Use this for initialization
 	void Start () {
-       /* BassKickLight = GameObject.Find("Bass Kick").GetComponent<Light>();
-        MelodyLowLight = GameObject.Find("Melody Low").GetComponent<Light>();
-		MelodyMidLight = GameObject.Find("Melody Mid").GetComponent<Light>();
-		SnareLight = GameObject.Find("Snare").GetComponent<Light>();*/
+        /* BassKickLight = GameObject.Find("Bass Kick").GetComponent<Light>();
+         MelodyLowLight = GameObject.Find("Melody Low").GetComponent<Light>();
+         MelodyMidLight = GameObject.Find("Melody Mid").GetComponent<Light>();
+         SnareLight = GameObject.Find("Snare").GetComponent<Light>();*/
+
+        ps.GetComponent<ParticleSystem>().Stop();
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 		
 		AudioListener.GetSpectrumData(spectrum, 0, FFTWindow.Hamming);
 
@@ -212,6 +217,12 @@ public class Visualizer : MonoBehaviour {
 
     public float fireFlyStartScale = 0.5f;
 
+    public Vector3 fireWorksStartPos = new Vector3(0, 300, 400);
+
+    public int msofLastFireWork = 0;
+    public int secofLastFireWork = 0;
+    public int fireWorkTimeBuffer = 300;
+
     public void Visualize(float bassKick, float melodyLow, float melodyMid, float snare)
     {
         // Sun Changes
@@ -234,15 +245,14 @@ public class Visualizer : MonoBehaviour {
 
         // Here we need the fire works
         // Pick a random, either splash or fire works
-
-        int rand = (int)(Random.value * 2f);
-        if(rand == 0)
+        if (snare > 0.06f && ((Mathf.Abs(System.DateTime.Now.Millisecond - msofLastFireWork) > fireWorkTimeBuffer) || (System.DateTime.Now.Second != secofLastFireWork)))
         {
-            //Splash
+            Vector3 spawnPos = new Vector3((Random.value * 700) + fireWorksStartPos.x - 350, (Random.value * 400) + fireWorksStartPos.y - 50, fireWorksStartPos.z);
+            GameObject partSys = (GameObject)Instantiate(ps, spawnPos, new Quaternion(0,0,0,0));
+            partSys.GetComponent<ParticleSystem>().Play();
+            msofLastFireWork = System.DateTime.Now.Millisecond;
+            secofLastFireWork = System.DateTime.Now.Second;
         }
-        else
-        {
-            // Fire Work
-        }
+        
     }
 }
