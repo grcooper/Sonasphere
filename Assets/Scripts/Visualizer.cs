@@ -180,7 +180,7 @@ public class Visualizer : MonoBehaviour {
         //     Debug.Log("Peak: " + i);
         //     Debug.Log(peakArray[i].getAverage());
         // }
-        float bassKickValue = subBass.max > 0.1f ? subBass.max : 0;
+        float bassKickValue = subBass.max > 0.09f ? subBass.max : 0;
         float snareValue = 9 * (lowMidrange.avg() * 0.16f + midrange.avg() * 0.17f + upperMidrange.max * 0.38f + presence.max * 0.29f);
         if (bassKickValue > 0.1f) {
             snareValue *= 0.1f;
