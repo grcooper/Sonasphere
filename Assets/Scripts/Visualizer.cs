@@ -48,7 +48,6 @@ public class Visualizer : MonoBehaviour {
 
     public int debugLineScale = 400;
 
-
 	// Use this for initialization
 	void Start () {
         BassKickLight = GameObject.Find("Bass Kick").GetComponent<Light>();
@@ -145,30 +144,30 @@ public class Visualizer : MonoBehaviour {
             Debug.Log("upperMidrange: " + upperMidrange);*/
         }
 
-		for (int i = 1; i < (spectrumSize / 1) - 1; i++)
-        {
-			// 20-50hz = 6.8 - 17 - Sub bass
-			if (subBass.inRange(i)) {
-				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.red);
-			}
-			// 60-250hz = 20.5 - 85.3 - Bass
-			else if (bass.inRange(i)) {
-				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.green);
-			}
-			// 250-500hz = 85.3 - 170.6 - Low Midrange
-			else if (lowMidrange.inRange(i)) {
-				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.blue);
-			}
-			//500-2k = 170.6 - 682.6 - Midrange
-			else if (midrange.inRange(i)) {
-				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.cyan);
-			} else {
-//				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.cyan);
-			}
-            //Debug.DrawLine(new Vector3(i - 1, Mathf.Abs(Mathf.Log(spectrum[i * 4]) * 50), 2), new Vector3(i, Mathf.Abs(Mathf.Log(spectrum[(i + 1) * 4]) * 50), 2), Color.cyan);
-            //Debug.DrawLine(new Vector3(Mathf.Log(i - 1), spectrum[i - 1] - 10, 1), new Vector3(Mathf.Log(i), spectrum[i] - 10, 1), Color.green);
-            // Debug.DrawLine(new Vector3(Mathf.Log(i - 1), Mathf.Log(spectrum[i - 1]), 3), new Vector3(Mathf.Log(i), Mathf.Log(spectrum[i]), 3), Color.blue);
-        }
+// 		for (int i = 1; i < (spectrumSize / 1) - 1; i++)
+//         {
+// 			// 20-50hz = 6.8 - 17 - Sub bass
+// 			if (subBass.inRange(i)) {
+// 				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.red);
+// 			}
+// 			// 60-250hz = 20.5 - 85.3 - Bass
+// 			else if (bass.inRange(i)) {
+// 				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.green);
+// 			}
+// 			// 250-500hz = 85.3 - 170.6 - Low Midrange
+// 			else if (lowMidrange.inRange(i)) {
+// 				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.blue);
+// 			}
+// 			//500-2k = 170.6 - 682.6 - Midrange
+// 			else if (midrange.inRange(i)) {
+// 				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.cyan);
+// 			} else {
+// //				Debug.DrawLine (new Vector3 (i - 1, spectrum [i] * debugLineScale, 0), new Vector3 (i, spectrum [i + 1] * debugLineScale, 0), Color.cyan);
+// 			}
+//             //Debug.DrawLine(new Vector3(i - 1, Mathf.Abs(Mathf.Log(spectrum[i * 4]) * 50), 2), new Vector3(i, Mathf.Abs(Mathf.Log(spectrum[(i + 1) * 4]) * 50), 2), Color.cyan);
+//             //Debug.DrawLine(new Vector3(Mathf.Log(i - 1), spectrum[i - 1] - 10, 1), new Vector3(Mathf.Log(i), spectrum[i] - 10, 1), Color.green);
+//             // Debug.DrawLine(new Vector3(Mathf.Log(i - 1), Mathf.Log(spectrum[i - 1]), 3), new Vector3(Mathf.Log(i), Mathf.Log(spectrum[i]), 3), Color.blue);
+//         }
 
         // Debug.Log("PEAKS");
         // for(int i = 0; i < peakArray.Count; ++i)
@@ -176,16 +175,18 @@ public class Visualizer : MonoBehaviour {
         //     Debug.Log("Peak: " + i);
         //     Debug.Log(peakArray[i].getAverage());
         // }
-        float bassKickValue = subBass.max;
-        float snareValue = lowMidrange.avg() * 0.16f + midrange.avg() * 0.38f + upperMidrange.max * 0.17f + presence.max * 0.29f;
+        float bassKickValue = subBass.max > 0.1f ? subBass.max : 0;
+        float snareValue = 9 * (lowMidrange.avg() * 0.16f + midrange.avg() * 0.17f + upperMidrange.max * 0.38f + presence.max * 0.29f);
         if (bassKickValue > 0.1f) {
             snareValue *= 0.1f;
+        } else if (snareValue <= 0.05f) {
+            snareValue = 0;
         }
 		
 		BassKickLight.intensity = bassKickValue * lightScale;
-		MelodyLowLight.intensity = bass.avg() * 5 * lightScale;
-		MelodyMidLight.intensity = lowMidrange.avg() * 5 * lightScale;
-		SnareLight.intensity = snareValue * 3 * lightScale;
+		MelodyLowLight.intensity = bass.max * 3 * lightScale;
+		MelodyMidLight.intensity = lowMidrange.max * 3 * lightScale;
+		SnareLight.intensity = snareValue * lightScale;
         // Debug.Log("subBass" + subBass.sum);
         // Debug.Log("bass" + bass.sum);
         // Debug.Log("lowMidrange" + lowMidrange.sum);
