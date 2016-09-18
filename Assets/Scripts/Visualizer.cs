@@ -264,7 +264,7 @@ public class Visualizer : MonoBehaviour {
         // Pick a random, either splash or fire works
         if (snare > 0.05f && ((Mathf.Abs(System.DateTime.Now.Millisecond - msofLastFireWork) > fireWorkTimeBuffer) || (System.DateTime.Now.Second != secofLastFireWork)))
         {
-            Vector3 spawnPos = new Vector3((Random.value * 700) + fireWorksStartPos.x - 350, (Random.value * 400) + fireWorksStartPos.y - 50, fireWorksStartPos.z);
+            Vector3 spawnPos = new Vector3((Random.value * 700) + fireWorksStartPos.x - 350, (Random.value * 400) + fireWorksStartPos.y, fireWorksStartPos.z);
             GameObject partSys = (GameObject)Instantiate(myParticleSystems[Random.Range(0,4)], spawnPos, new Quaternion(0,0,0,0));
 
             partSys.GetComponent<ParticleSystem>().startSpeed = fireworkSpeedScale + (fireworkSpeedScale * snare * 2);
