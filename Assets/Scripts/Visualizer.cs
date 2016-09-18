@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 public class Visualizer : MonoBehaviour {
 
-    public float lightScale = 100;
+    /*public float lightScale = 100;
     Light BassKickLight;
     Light MelodyLowLight;
     Light MelodyMidLight;
-    Light SnareLight;
+    Light SnareLight;*/
 
 	public float lifetimeBase = 1;
 	public float lifetimeScale = 8;
@@ -50,10 +50,10 @@ public class Visualizer : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        BassKickLight = GameObject.Find("Bass Kick").GetComponent<Light>();
+       /* BassKickLight = GameObject.Find("Bass Kick").GetComponent<Light>();
         MelodyLowLight = GameObject.Find("Melody Low").GetComponent<Light>();
 		MelodyMidLight = GameObject.Find("Melody Mid").GetComponent<Light>();
-		SnareLight = GameObject.Find("Snare").GetComponent<Light>();
+		SnareLight = GameObject.Find("Snare").GetComponent<Light>();*/
 	}
 	
 	// Update is called once per frame
@@ -182,17 +182,20 @@ public class Visualizer : MonoBehaviour {
         } else if (snareValue <= 0.05f) {
             snareValue = 0;
         }
-		
-		BassKickLight.intensity = bassKickValue * lightScale;
+
+        /*BassKickLight.intensity = bassKickValue * lightScale;
 		MelodyLowLight.intensity = bass.max * 3 * lightScale;
 		MelodyMidLight.intensity = lowMidrange.max * 3 * lightScale;
-		SnareLight.intensity = snareValue * lightScale;
+		SnareLight.intensity = snareValue * lightScale;*/
         // Debug.Log("subBass" + subBass.sum);
         // Debug.Log("bass" + bass.sum);
         // Debug.Log("lowMidrange" + lowMidrange.sum);
         // Debug.Log("midrange" + midrange.sum);
         // Debug.Log("uper" + upperMidrange.sum);
         // Debug.Log("pres" + presence.sum);
+
+        Visualize(bassKickValue, bass.max * 3, lowMidrange.max * 3, snareValue);
+
         subBass.reset();
         bass.reset();
         lowMidrange.reset();
@@ -200,4 +203,46 @@ public class Visualizer : MonoBehaviour {
         upperMidrange.reset();
         presence.reset();
 	}
+
+    public Vector3 sunStartScale = new Vector3(100, 100, 100);
+    public int sunExtraScale = 2;
+    //public float sunStartScale = 100f;
+
+    public float waterStartScale = 5f;
+
+    public float fireFlyStartScale = 0.5f;
+
+    public void Visualize(float bassKick, float melodyLow, float melodyMid, float snare)
+    {
+        // Sun Changes
+        GameObject mun = GameObject.Find("Mun");
+        mun.transform.localScale = sunStartScale + (sunStartScale * bassKick * sunExtraScale);
+
+        // Water
+        GameObject water = GameObject.Find("Water");
+        water.GetComponent<WaveGen>().scale = waterStartScale * melodyLow;
+
+        //Fire Flies
+        GameObject fireFlies1 = GameObject.Find("Firefly1");
+        fireFlies1.GetComponent<ParticleSystem>().startSize = fireFlyStartScale * melodyMid;
+        GameObject fireFlies2 = GameObject.Find("Firefly2");
+        fireFlies2.GetComponent<ParticleSystem>().startSize = fireFlyStartScale * melodyMid;
+        GameObject fireFlies3 = GameObject.Find("Firefly3");
+        fireFlies3.GetComponent<ParticleSystem>().startSize = fireFlyStartScale * melodyMid;
+        GameObject fireFlies4 = GameObject.Find("Firefly4");
+        fireFlies4.GetComponent<ParticleSystem>().startSize = fireFlyStartScale * melodyMid;
+
+        // Here we need the fire works
+        // Pick a random, either splash or fire works
+
+        int rand = (int)(Random.value * 2f);
+        if(rand == 0)
+        {
+            //Splash
+        }
+        else
+        {
+            // Fire Work
+        }
+    }
 }

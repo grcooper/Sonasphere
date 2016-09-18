@@ -11,7 +11,7 @@ public class DayChange : MonoBehaviour {
 
     void Start ()
     {
-        SetDay();
+        //SetDay();
     }
 
     public void SetDay() {
